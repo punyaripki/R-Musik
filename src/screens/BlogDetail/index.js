@@ -150,34 +150,7 @@ const BlogDetail = ({route}) => {
           <Text style={styles.content}>{selectedBlog?.content}</Text>
         </Animated.ScrollView>
       )}
-      <Animated.View
-        style={[styles.bottomBar, {transform: [{translateY: bottomBarY}]}]}>
-        <View style={{flexDirection: 'row', gap: 5, alignItems: 'center'}}>
-          <TouchableOpacity onPress={() => toggleIcon('liked')}>
-            <Like1
-              color={iconStates.liked.color}
-              variant={iconStates.liked.variant}
-              size={24}
-            />
-          </TouchableOpacity>
-          <Text style={styles.info}>
-            {formatNumber(selectedBlog?.totalLikes)}
-          </Text>
-        </View>
-        <View style={{flexDirection: 'row', gap: 5, alignItems: 'center'}}>
-          <Message color={colors.grey(0.6)} variant="Linear" size={24} />
-          <Text style={styles.info}>
-            {formatNumber(selectedBlog?.totalComments)}
-          </Text>
-        </View>
-        <TouchableOpacity onPress={() => toggleIcon('bookmarked')}>
-          <Receipt21
-            color={iconStates.bookmarked.color}
-            variant={iconStates.bookmarked.variant}
-            size={24}
-          />
-        </TouchableOpacity>
-      </Animated.View>
+   
       <ActionSheet
         ref={actionSheetRef}
         containerStyle={{
