@@ -1,45 +1,54 @@
 import {ScrollView, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, RefreshControl} from 'react-native';
-import {Edit, Setting2} from 'iconsax-react-native';
-import React, { useState, useCallback} from 'react';
+import {Edit, Setting2,Play} from 'iconsax-react-native';
+import React, { useEffect, useState, useCallback} from 'react';
 import FastImage from 'react-native-fast-image';
 import {ProfileData} from '../../../data';
 import {ItemSmall} from '../../components';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {fontType, colors} from '../../theme';
-import {formatNumber} from '../../utils/formatNumber';
-import axios from 'axios';
+import firestore from '@react-native-firebase/firestore';
+import {formatNumber} from '../../utils/formatNumber';;
 
 const Profile = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [blogData, setBlogData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const getDataBlog = async () => {
-    try {
-      const response = await axios.get(
-        'https://6571422909586eff66425bc0.mockapi.io/r-music/blog',
-      );
-      setBlogData(response.data);
-      setLoading(false)
-    } catch (error) {
-        console.error(error);
-    }
-  };
+  useEffect(() => {
+    const subscriber = firestore()
+      .collection('blog')
+      .onSnapshot(querySnapshot => {
+        const blogs = [];
+        querySnapshot.forEach(documentSnapshot => {
+          blogs.push({
+            ...documentSnapshot.data(),
+            id: documentSnapshot.id,
+          });
+        });
+        setBlogData(blogs);
+        setLoading(false);
+      });
+    return () => subscriber();
+  }, []);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     setTimeout(() => {
-      getDataBlog()
+      firestore()
+        .collection('blog')
+        .onSnapshot(querySnapshot => {
+          const blogs = [];
+          querySnapshot.forEach(documentSnapshot => {
+            blogs.push({
+              ...documentSnapshot.data(),
+              id: documentSnapshot.id,
+            });
+          });
+          setBlogData(blogs);
+        });
       setRefreshing(false);
     }, 1500);
   }, []);
-
-  useFocusEffect(
-    useCallback(() => {
-      getDataBlog();
-    }, [])
-  );
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -98,7 +107,7 @@ const Profile = () => {
           {loading ? (
             <ActivityIndicator size={'large'} color={colors.blue()} />
           ) : (
-            blogData.map((item, index) => <ItemSmall item={item} key={index} />)
+            blogData.map((item, index) => <ItemSmall item={item} key={index} Play={false} />)
           )}
         </View>
       </ScrollView>

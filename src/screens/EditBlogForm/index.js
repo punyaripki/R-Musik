@@ -3,10 +3,12 @@ import {View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Activit
 import {ArrowLeft} from 'iconsax-react-native';
 import {useNavigation} from '@react-navigation/native';
 import {fontType, colors} from '../../theme';
-import axios from 'axios';
+import ImagePicker from 'react-native-image-crop-picker';
+import storage from '@react-native-firebase/storage';
+import firestore from '@react-native-firebase/firestore';
 
 const EditBlogForm = ({route}) => {
-const {blogId} = route.params;
+  const {blogId} = route.params;
   const dataCategory = [
     {id: 1, name: 'Food'},
     {id: 2, name: 'Sports'},
@@ -31,56 +33,81 @@ const {blogId} = route.params;
     });
   };
   const [image, setImage] = useState(null);
+  const [oldImage, setOldImage] = useState(null);
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    getBlogById();
+    const subscriber = firestore()
+      .collection('blog')
+      .doc(blogId)
+      .onSnapshot(documentSnapshot => {
+        const blogData = documentSnapshot.data();
+        if (blogData) {
+          console.log('Blog data: ', blogData);
+          setBlogData({
+            title: blogData.title,
+            content: blogData.content,
+            category: {
+              id: blogData.category.id,
+              name: blogData.category.name,
+            },
+          });
+          setOldImage(blogData.image);
+          setImage(blogData.image);
+          setLoading(false);
+        } else {
+          console.log(`Blog with ID ${blogId} not found.`);
+        }
+      });
+    setLoading(false);
+    return () => subscriber();
   }, [blogId]);
 
-  const getBlogById = async () => {
-    try {
-      const response = await axios.get(
-        `https://6571422909586eff66425bc0.mockapi.io/r-music/blog/${blogId}`,
-      );
-      setBlogData({
-        title : response.data.title,
-        content : response.data.content,
-        category : {
-            id : response.data.category.id,
-            name : response.data.category.name
-        }
+  const handleImagePick = async () => {
+    ImagePicker.openPicker({
+      width: 1920,
+      height: 1080,
+      cropping: true,
+    })
+      .then(image => {
+        console.log(image);
+        setImage(image.path);
       })
-    setImage(response.data.image)
-      setLoading(false);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  const handleUpdate = async () => {
-    setLoading(true);
-    try {
-      await axios
-        .put(`https://6571422909586eff66425bc0.mockapi.io/r-music/blog/${blogId}`, {
-          title: blogData.title,
-          category: blogData.category,
-          image,
-          content: blogData.content,
-          totalComments: blogData.totalComments,
-          totalLikes: blogData.totalLikes,
-        })
-        .then(function (response) {
-          console.log(response);
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
-      setLoading(false);
-      navigation.navigate('Bookmark');
-    } catch (e) {
-      console.log(e);
-    }
+      .catch(error => {
+        console.log(error);
+      });
   };
 
+  const handleUpdate = async () => {
+    setLoading(true);
+    let filename = image.substring(image.lastIndexOf('/') + 1);
+    const extension = filename.split('.').pop();
+    const name = filename.split('.').slice(0, -1).join('.');
+    filename = name + Date.now() + '.' + extension;
+    const reference = storage().ref(`blogimages/${filename}`);
+    try {
+      if (image !== oldImage && oldImage) {
+        const oldImageRef = storage().refFromURL(oldImage);
+        await oldImageRef.delete();
+      }
+      if (image !== oldImage) {
+        await reference.putFile(image);
+      }
+      const url =
+        image !== oldImage ? await reference.getDownloadURL() : oldImage;
+      await firestore().collection('blog').doc(blogId).update({
+        title: blogData.title,
+        category: blogData.category,
+        image: url,
+        content: blogData.content,
+      });
+      setLoading(false);
+      console.log('Blog Updated!');
+      navigation.navigate('BlogDetail', {blogId});
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <View style={styles.container}>
       <View style={styles.header}>
