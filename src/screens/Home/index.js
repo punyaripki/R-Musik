@@ -1,24 +1,37 @@
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, FlatList, TouchableOpacity,Image} from 'react-native';
-import { Setting } from 'iconsax-react-native';
-import { BlogList, CategoryList,ProfileData } from '../../../data';
-import { fontType, colors } from '../../theme';
-import { Profile } from '../Profile';
-import { ListHorizontal, ItemSmall } from '../../components';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { DrawerLayout } from 'react-native-gesture-handler';
+import React, {useState} from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import {Setting} from 'iconsax-react-native';
+import {BlogList, CategoryList, ProfileData} from '../../../data';
+import {fontType, colors} from '../../theme';
+import {Profile} from '../Profile';
+import {ListHorizontal, ItemSmall} from '../../components';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import {DrawerLayout} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
 const navigation = useNavigation();
 
 export default function Home() {
   const Drawer = createDrawerNavigator();
   return (
-    <Drawer.Navigator color={colors.latar()} headerShown={false} initialRouteName="Home"
-     drawerContent={() => 
-    <DrawerContent />}>
-      <Drawer.Screen name="Home" component={HomeScreen} style={styles.Navigator}/>
+    <Drawer.Navigator
+      color={colors.latar()}
+      headerShown={false}
+      initialRouteName="Home"
+      drawerContent={() => <DrawerContent />}>
+      <Drawer.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        style={styles.Navigator}
+      />
     </Drawer.Navigator>
-   
   );
 }
 
@@ -33,7 +46,7 @@ const HomeScreen = () => {
           headerShown={false}
           color={colors.latar()}
           renderNavigationView={DrawerContent}
-       />
+        />
       </View>
       <View style={styles.listCategory}>
         <FlatListCategory />
@@ -43,20 +56,21 @@ const HomeScreen = () => {
   );
 };
 
-
-
 const DrawerContent = () => {
-  
   return (
     <View style={styles.drawerContent}>
-      <TouchableOpacity onPress={() => navigation.navigate("ProfilePage")}>
-      <Image style={styles.pic} source={{ uri: 'https://media.licdn.com/dms/image/D5603AQEIpqnjQqkSpA/profile-displayphoto-shrink_800_800/0/1698759551331?e=2147483647&v=beta&t=UyGrO1N2WYpUuWC9faykVTT21OvTcKBGXRh8TlsXzV0'}} />
-      <Text style={styles.textProfile}>{ProfileData.name}</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('ProfilePage')}>
+        <Image
+          style={styles.pic}
+          source={{
+            uri: 'https://media.licdn.com/dms/image/D5603AQEIpqnjQqkSpA/profile-displayphoto-shrink_800_800/0/1698759551331?e=2147483647&v=beta&t=UyGrO1N2WYpUuWC9faykVTT21OvTcKBGXRh8TlsXzV0',
+          }}
+        />
+        <Text style={styles.textProfile}>{ProfileData.name}</Text>
       </TouchableOpacity>
     </View>
   );
 };
-
 
 const ListBlog = () => {
   const horizontalData = BlogList.slice(0, 5);
@@ -66,15 +80,42 @@ const ListBlog = () => {
       <Text style={styles.trending}>Trending Right Now</Text>
       <View style={styles.listBlog}>
         <ListHorizontal data={horizontalData} />
-        <Text style={{ color: 'white', paddingHorizontal: 24, fontSize: 20, fontFamily: fontType['Pjs-Bold'] }}> Category </Text>
-        <View style={{ ...category.item, marginLeft: 10 }}>
-          <View style={{ alignItems: 'center', padding: 10, backgroundColor:colors.green(),borderRadius:5  }}>
+        <Text
+          style={{
+            color: 'white',
+            paddingHorizontal: 24,
+            fontSize: 20,
+            fontFamily: fontType['Pjs-Bold'],
+          }}>
+          {' '}
+          Category{' '}
+        </Text>
+        <View style={{...category.item, marginLeft: 10}}>
+          <View
+            style={{
+              alignItems: 'center',
+              padding: 10,
+              backgroundColor: colors.green(),
+              borderRadius: 5,
+            }}>
             <Text style={category.textCat}>Region</Text>
           </View>
-          <View style={{ alignItems: 'center', padding: 10,backgroundColor:colors.green(),borderRadius:5  }}>
+          <View
+            style={{
+              alignItems: 'center',
+              padding: 10,
+              backgroundColor: colors.green(),
+              borderRadius: 5,
+            }}>
             <Text style={category.textCat}>Tools</Text>
           </View>
-          <View style={{ alignItems: 'center', padding: 10, backgroundColor:colors.green(),borderRadius:5 }}>
+          <View
+            style={{
+              alignItems: 'center',
+              padding: 10,
+              backgroundColor: colors.green(),
+              borderRadius: 5,
+            }}>
             <Text style={category.textCat}>Time</Text>
           </View>
         </View>
@@ -90,7 +131,7 @@ const ListBlog = () => {
 
 const FlatListCategory = () => {
   const [selected, setSelected] = useState(1);
-  const renderItem = ({ item }) => {
+  const renderItem = ({item}) => {
     const color = item.id === selected ? colors.blue() : colors.grey();
     return (
       <ItemCategory
@@ -104,21 +145,21 @@ const FlatListCategory = () => {
   return (
     <FlatList
       data={CategoryList}
-      keyExtractor={(item) => item.id}
-      renderItem={(item) => renderItem({ ...item })}
-      ItemSeparatorComponent={() => <View style={{ width: 10 }} />}
-      contentContainerStyle={{ paddingHorizontal: 24 }}
+      keyExtractor={item => item.id}
+      renderItem={item => renderItem({...item})}
+      ItemSeparatorComponent={() => <View style={{width: 10}} />}
+      contentContainerStyle={{paddingHorizontal: 24}}
       horizontal
       showsHorizontalScrollIndicator={false}
     />
   );
 };
 
-const ItemCategory = ({ item, onPress, color }) => {
+const ItemCategory = ({item, onPress, color}) => {
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={category.item}>
-        <Text style={{ ...category.title, color }}>{item.categoryName}</Text>
+        <Text style={{...category.title, color}}>{item.categoryName}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -153,10 +194,10 @@ const styles = StyleSheet.create({
   },
   trending: {
     fontSize: 25,
-    fontFamily:'Bold',
+    fontFamily: 'Bold',
     color: colors.white(),
     marginLeft: 25,
-    marginTop:5,
+    marginTop: 5,
   },
   listCard: {
     paddingHorizontal: 24,
@@ -175,12 +216,12 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 100,
   },
-  textProfile:{
-fontSize:20,
+  textProfile: {
+    fontSize: 20,
   },
-  Navigator :{
-    color:colors.latar(),
-    fontSize:20,
+  Navigator: {
+    color: colors.latar(),
+    fontSize: 20,
   },
 });
 
@@ -194,7 +235,6 @@ const category = StyleSheet.create({
     marginHorizontal: 5,
     flexDirection: 'row',
     justifyContent: 'space-around',
-   
   },
   title: {
     fontFamily: fontType['Pjs-SemiBold'],

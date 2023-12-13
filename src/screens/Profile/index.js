@@ -1,19 +1,48 @@
-import {ScrollView, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, RefreshControl} from 'react-native';
-import {Edit, Setting2,Play} from 'iconsax-react-native';
-import React, { useEffect, useState, useCallback} from 'react';
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native';
+import {Edit, Setting2, Play} from 'iconsax-react-native';
+import React, {useEffect, useState, useCallback, useRef} from 'react';
 import FastImage from 'react-native-fast-image';
 import {ProfileData} from '../../../data';
 import {ItemSmall} from '../../components';
 import {useNavigation, useFocusEffect} from '@react-navigation/native';
 import {fontType, colors} from '../../theme';
 import firestore from '@react-native-firebase/firestore';
-import {formatNumber} from '../../utils/formatNumber';;
+import {formatNumber} from '../../utils/formatNumber';
+import ActionSheet from 'react-native-actions-sheet';
+import auth from '@react-native-firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Profile = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [blogData, setBlogData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const actionSheetRef = useRef(null);
+  const openActionSheet = () => {
+    actionSheetRef.current?.show();
+  };
+  const closeActionSheet = () => {
+    actionSheetRef.current?.hide();
+  };
+  const handleLogout = async () => {
+    try {
+      closeActionSheet();
+      await auth().signOut();
+      await AsyncStorage.removeItem('userData');
+      navigation.replace('Login');
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
     const subscriber = firestore()
       .collection('blog')
@@ -52,8 +81,8 @@ const Profile = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity>
-          <Setting2 color={colors.black()} variant="Linear" size={24} />
+        <TouchableOpacity onPress={openActionSheet}>
+          <Setting2 color={colors.white()} variant="Linear" size={24} />
         </TouchableOpacity>
       </View>
       <ScrollView
@@ -62,7 +91,8 @@ const Profile = () => {
           paddingHorizontal: 24,
           gap: 10,
           paddingVertical: 20,
-        }} refreshControl={
+        }}
+        refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }>
         <View style={{gap: 15, alignItems: 'center'}}>
@@ -107,7 +137,7 @@ const Profile = () => {
           {loading ? (
             <ActivityIndicator size={'large'} color={colors.blue()} />
           ) : (
-            blogData.map((item, index) => <ItemSmall item={item} key={index} Play={false} />)
+            blogData.map((item, index) => <ItemSmall item={item} key={index} />)
           )}
         </View>
       </ScrollView>
@@ -116,6 +146,50 @@ const Profile = () => {
         onPress={() => navigation.navigate('AddBlog')}>
         <Edit color={colors.white()} variant="Linear" size={20} />
       </TouchableOpacity>
+      <ActionSheet
+        ref={actionSheetRef}
+        containerStyle={{
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
+        }}
+        indicatorStyle={{
+          width: 100,
+        }}
+        gestureEnabled={true}
+        defaultOverlayOpacity={0.3}>
+        <TouchableOpacity
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 15,
+          }}
+          onPress={handleLogout}>
+          <Text
+            style={{
+              fontFamily: fontType['Pjs-Medium'],
+              color: colors.black(),
+              fontSize: 18,
+            }}>
+            Log out
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 15,
+          }}
+          onPress={closeActionSheet}>
+          <Text
+            style={{
+              fontFamily: fontType['Pjs-Medium'],
+              color: 'red',
+              fontSize: 18,
+            }}>
+            Cancel
+          </Text>
+        </TouchableOpacity>
+      </ActionSheet>
     </View>
   );
 };
@@ -163,6 +237,11 @@ const styles = StyleSheet.create({
     shadowRadius: 4.65,
 
     elevation: 8,
+  },
+  Backgroud : { 
+    backgroundColor : colors.green(),
+    borderRadius : 20,
+    paddingBottom:110,
   },
 });
 const profile = StyleSheet.create({
