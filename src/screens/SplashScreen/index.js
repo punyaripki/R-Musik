@@ -1,6 +1,7 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, View,Image} from 'react-native';
 import React, {useEffect} from 'react';
 import {colors, fontType} from '../../theme';
+import FastImage from 'react-native-fast-image';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -49,24 +50,16 @@ const SplashScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.logo}>WOCO.</Text>
+      <Image
+          style={styles.pic}
+          source={{
+            uri : 'https://i.pinimg.com/564x/19/e9/c1/19e9c17c2f768e7d2b6e687f5ff90d61.jpg'
+          }}
+        />
+      <Text style={styles.logo}>R-Music</Text>
       <View style={styles.infoContainer}>
         <Text style={[styles.info, {fontFamily: fontType['Pjs-Regular']}]}>
-          Presented By
-        </Text>
-        <Text
-          style={[
-            styles.info,
-            {fontFamily: fontType['Pjs-SemiBold'], textAlign: 'center'},
-          ]}>
-          Mobile Programming
-        </Text>
-        <Text
-          style={[
-            styles.info,
-            {fontFamily: fontType['Pjs-SemiBold'], textAlign: 'center'},
-          ]}>
-          Laboratory
+          The Journey Begins
         </Text>
       </View>
     </View>
@@ -78,13 +71,20 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white(),
+    backgroundColor: colors.latar(),
     justifyContent: 'center',
+  },
+  pic: {
+    width: 180,
+    height: 180,
+   left:100,
+    display: 'flex',
+    alignItems: 'center',
   },
   logo: {
     fontSize: 48,
     fontFamily: fontType['Pjs-ExtraBold'],
-    color: colors.black(),
+    color: colors.white(),
     alignSelf: 'center',
   },
   infoContainer: {
@@ -96,6 +96,6 @@ const styles = StyleSheet.create({
   },
   info: {
     fontSize: 12,
-    color: colors.grey(0.6),
+    color: colors.white(),
   },
 });
